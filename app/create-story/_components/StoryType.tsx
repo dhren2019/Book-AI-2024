@@ -25,6 +25,11 @@ function StoryType({userSelection}:any) {
             imageUrl:'/educational.png',
             isFree:true
         },
+        {
+            label: 'Emotions',  // Nueva opción
+            imageUrl: '/emotions.png',  // Añadir una imagen representativa para esta opción
+            isFree: true
+        },
     ]
 
     const [selectedOption,setSelectedOption]=useState<string>();
