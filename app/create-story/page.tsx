@@ -27,7 +27,8 @@ export interface formDataType{
   storySubject:string,
   storyType:string,
   imageStyle:string,
-  ageGroup:string
+  ageGroup:string,
+  emotion: string; // Emotions
 }
 function CreateStory() {
 
@@ -63,6 +64,7 @@ function CreateStory() {
     const FINAL_PROMPT=CREATE_STORY_PROMPT
     ?.replace('{ageGroup}',formData?.ageGroup??'')
     .replace('{storyType}',formData?.storyType??'')
+    .replace('{emotion}', formData?.emotion ?? '')
     .replace('{storySubject}',formData?.storySubject??'')
     .replace('{imageStyle}',formData?.imageStyle??'')
     //Generate AI Story

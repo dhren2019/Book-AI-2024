@@ -35,31 +35,32 @@ function StoryType({ userSelection }: any) {
     const emotionsList = [
         { label: 'Happy', imageUrl: '/happy.webp', isFree: true },
         { label: 'Sad', imageUrl: '/sad.webp', isFree: true },
-        { label: 'Excited', imageUrl: '/excited.png', isFree: true },
-        { label: 'Anxious', imageUrl: '/anxious.png', isFree: true },
-        { label: 'Relaxed', imageUrl: '/relaxed.png', isFree: true },
-        { label: 'Curious', imageUrl: '/curious.png', isFree: true }
+        { label: 'Excited', imageUrl: '/excited.webp', isFree: true },
+        { label: 'Anxious', imageUrl: '/anxious.webp', isFree: true },
+        { label: 'Relaxed', imageUrl: '/relaxed.webp', isFree: true },
+        { label: 'Curious', imageUrl: '/corious.webp', isFree: true }
     ];
 
-    const [selectedOption, setSelectedOption] = useState<string>();
-    const [showEmotions, setShowEmotions] = useState<boolean>(false);
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
 
     const onUserSelect = (item: OptionField) => {
         if (item.label === 'Emotions') {
-            setShowEmotions(true);  // Mostrar la lista de emociones
+            setSelectedOption('Emotions');  // Cambiar el estado para mostrar las emociones
         } else {
             setSelectedOption(item.label);
+            setSelectedEmotion(null);  // Reiniciar la emoción si selecciona otro tipo de historia
             userSelection({
-                fieldValue: item?.label,
+                fieldValue: item.label,
                 fieldName: 'storyType'
             });
         }
     }
 
     const onEmotionSelect = (emotion: OptionField) => {
-        setSelectedOption(emotion.label);
+        setSelectedEmotion(emotion.label);  // Almacenar la emoción seleccionada
         userSelection({
-            fieldValue: emotion?.label,
+            fieldValue: emotion.label,
             fieldName: 'emotion'
         });
     };
@@ -67,14 +68,13 @@ function StoryType({ userSelection }: any) {
     return (
         <div>
             <label className='font-bold text-4xl text-primary'>2. Story Type</label>
-            {!showEmotions ? (
+            {selectedOption !== 'Emotions' ? (
                 <div className='grid grid-cols-3 gap-5 mt-3'>
-                    {OptionList.map((item, index) => (
+                    {OptionList.map((item) => (
                         <div
-                            key={index}
+                            key={item.label}
                             className={`relative grayscale hover:grayscale-0 cursor-pointer p-1
-                            ${selectedOption === item.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale'}
-                        `}
+                            ${selectedOption === item.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale'}`}
                             onClick={() => onUserSelect(item)}
                         >
                             <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{item.label}</h2>
@@ -90,12 +90,11 @@ function StoryType({ userSelection }: any) {
                 </div>
             ) : (
                 <div className='grid grid-cols-3 gap-5 mt-3'>
-                    {emotionsList.map((emotion, index) => (
+                    {emotionsList.map((emotion) => (
                         <div
-                            key={index}
+                            key={emotion.label}
                             className={`relative grayscale hover:grayscale-0 cursor-pointer p-1
-                            ${selectedOption === emotion.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale'}
-                        `}
+                            ${selectedEmotion === emotion.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale'}`}
                             onClick={() => onEmotionSelect(emotion)}
                         >
                             <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{emotion.label}</h2>
@@ -108,6 +107,16 @@ function StoryType({ userSelection }: any) {
                             />
                         </div>
                     ))}
+                </div>
+            )}
+            {selectedOption === 'Emotions' && (
+                <div className='flex justify-end mt-5'>
+                    <button
+                        onClick={() => setSelectedOption(null)}
+                        className='text-primary underline cursor-pointer'
+                    >
+                        Back to Story Types
+                    </button>
                 </div>
             )}
         </div>
