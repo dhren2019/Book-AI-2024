@@ -25,3 +25,8 @@ body {
     text-wrap: balance;
   }
 }
+.story-text {
+  color: #333; /* Cambiar a un color más oscuro */
+  opacity: 1;   /* Asegúrate de que la opacidad sea 100% */
+}
+
