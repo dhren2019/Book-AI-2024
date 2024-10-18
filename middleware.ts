@@ -1,10 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/create-story(.*)'])
+// Protegemos solo '/dashboard' y las subrutas específicas de 'create-story' (no la ruta principal)
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/create-story/interactive-stories(.*)']);
 
 export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect()
-})
+  if (isProtectedRoute(req)) {
+    // Asegurarse de proteger si está en una de las rutas protegidas
+    auth().protect();
+  }
+});
 
 export const config = {
   matcher: [
