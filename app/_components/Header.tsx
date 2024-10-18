@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@nextui-org/button';
 import { UserButton, useUser } from '@clerk/nextjs';
+import { FaCrown } from 'react-icons/fa';
 
 function Header() {
     const { user, isSignedIn } = useUser();
@@ -27,9 +28,9 @@ function Header() {
         { 
             name: 'Create Story', 
             path: '/create-story',
-            subItems: isSignedIn ? [ // Solo muestra el submenú si el usuario está autenticado
-                { name: 'Interactive Stories', path: '/create-story/interactive-stories' }
-            ] : []
+            subItems: [
+                { name: 'Interactive Stories', path: '/create-story/interactive-stories', icon: <FaCrown /> }
+            ]
         },
         { name: 'Explore Stories', path: '/explore' },
         { name: 'Contact Us', path: '/contact-us' }
@@ -47,7 +48,7 @@ function Header() {
         // Añadir un pequeño retraso antes de cerrar el submenú
         timeoutRef.current = setTimeout(() => {
             setOpenSubmenu(null);
-        }, 500); // Espera de 500ms
+        }, 300); // Espera de 300ms
     };
 
     return (
@@ -66,7 +67,7 @@ function Header() {
                 {MenuList.map((item) => (
                     <div 
                         key={item.name}
-                        className='relative'
+                        className='relative group'
                         onMouseEnter={() => item.subItems && handleMouseEnter(item.name)}
                         onMouseLeave={() => item.subItems && handleMouseLeave()}
                     >
@@ -77,15 +78,17 @@ function Header() {
                                 {item.name}
                             </Link>
                         </NavbarItem>
-                        {item.subItems && item.subItems.length > 0 && openSubmenu === item.name && (
+                        {item.subItems && openSubmenu === item.name && (
                             <div 
-                                className="absolute top-full left-0 mt-2 p-2 bg-white shadow-lg rounded-md transition-opacity duration-200 ease-in-out"
-                                onMouseEnter={() => handleMouseEnter(item.name)}
-                                onMouseLeave={() => handleMouseLeave()}
+                                className="absolute top-full left-0 mt-2 p-3 bg-white shadow-lg rounded-md transition-all duration-200 ease-in-out opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                                style={{ minWidth: '200px', border: '1px solid #e0e0e0' }}
                             >
                                 {item.subItems.map((subItem) => (
                                     <Link key={subItem.name} href={subItem.path}>
-                                        <p className='text-lg text-primary font-medium hover:underline my-1'>{subItem.name}</p>
+                                        <div className='flex items-center p-3 hover:bg-gray-100 rounded-md transition-colors duration-150 cursor-pointer'>
+                                            <span className='mr-2 text-yellow-500'>{subItem.icon}</span>
+                                            <p className='text-lg text-primary font-medium'>{subItem.name}</p>
+                                        </div>
                                     </Link>
                                 ))}
                             </div>
