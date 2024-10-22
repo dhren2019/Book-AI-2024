@@ -46,7 +46,7 @@ function BuyCredits() {
         },
     ];
     const [selectedPrice, setSelectedPrice] = useState<number>(0);
-    const [selectedOption, setSelectedOption] = useState<number | null>(null); // Cambié de 0 a null para representar cuando no se ha seleccionado nada
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
     const { userDetail, setUserDetail } = useContext(UserDetailContext);
     const router = useRouter();
@@ -80,6 +80,8 @@ function BuyCredits() {
             } else {
                 notifyError('Server Error');
             }
+        } else {
+            notifyError("An error occurred: No option was selected.");
         }
     };
 
@@ -125,12 +127,16 @@ function BuyCredits() {
                     <div className="relative bg-gradient-to-b from-purple-900 to-blue-900 rounded-lg max-w-md mx-auto p-10 shadow-2xl transform transition-all duration-500">
                         <h2 className="text-5xl font-extrabold text-yellow-300 mb-5 drop-shadow-md">Confirm Your Purchase</h2>
                         <div className='mb-5'>
-                            <h3 className='text-3xl text-yellow-100'>You are purchasing {Options[selectedOption - 1]?.credits} credits for ${selectedPrice.toFixed(2)}</h3>
-                            <h3 className='text-2xl text-yellow-200'>This will allow you to generate <strong>{Options[selectedOption - 1]?.stories}</strong> stories.</h3>
+                            {selectedOption !== null && (
+                                <>
+                                    <h3 className='text-3xl text-yellow-100'>You are purchasing {Options[selectedOption - 1]?.credits} credits for ${selectedPrice.toFixed(2)}</h3>
+                                    <h3 className='text-2xl text-yellow-200'>This will allow you to generate <strong>{Options[selectedOption - 1]?.stories}</strong> stories.</h3>
+                                </>
+                            )}
                         </div>
                         <PayPalButtons
                             style={{ layout: "vertical" }}
-                            disabled={!selectedOption || selectedOption === 0 || selectedPrice <= 0}
+                            disabled={selectedOption === null || selectedPrice <= 0}
                             onApprove={(data, actions) => {
                                 if (actions && actions.order) {
                                     return actions.order.capture().then(() => {
