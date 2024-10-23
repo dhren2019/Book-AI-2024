@@ -26,6 +26,19 @@ function ViewStory({ params }) {
     setStory(result[0]);
   }
 
+  const handleFullScreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { // Firefox
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE/Edge
+      elem.msRequestFullscreen();
+    }
+  }
+
   return (
     <div className='p-4 md:px-10 lg:px-20 flex justify-center items-center flex-col min-h-screen'>
       <h2 className='font-bold text-3xl md:text-4xl text-center p-6 bg-primary text-white rounded-md w-full max-w-3xl'>{story?.output?.story_cover?.title}</h2>
@@ -85,7 +98,7 @@ function ViewStory({ params }) {
           <IoIosDownload className='text-[40px] text-primary' />
           <span className='mt-2 text-primary'>Descargar</span>
         </div>
-        <div className='flex flex-col items-center cursor-pointer'>
+        <div className='flex flex-col items-center cursor-pointer' onClick={handleFullScreen}>
           <IoIosExpand className='text-[40px] text-primary' />
           <span className='mt-2 text-primary'>Ampliar</span>
         </div>
