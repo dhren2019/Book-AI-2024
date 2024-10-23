@@ -14,6 +14,7 @@ function ViewStory({ params }) {
   const [story, setStory] = useState();
   const bookRef = useRef();
   const [count, setCount] = useState(0);
+  const [viewMode, setViewMode] = useState('flipbook'); // Agregar modo de vista
 
   useEffect(() => {
     getStory();
@@ -29,29 +30,40 @@ function ViewStory({ params }) {
     <div className='p-4 md:px-10 lg:px-20 flex justify-center items-center flex-col min-h-screen'>
       <h2 className='font-bold text-3xl md:text-4xl text-center p-6 bg-primary text-white rounded-md w-full max-w-3xl'>{story?.output?.story_cover?.title}</h2>
       <div className='relative flex justify-center items-center mt-10 w-full'>
-        {/* Ajuste del tamaño del libro para adaptarse a diferentes dispositivos */}
-        <HTMLFlipBook 
-          width={window.innerWidth < 768 ? 300 : 500} 
-          height={window.innerWidth < 768 ? 400 : 500}
-          maxWidth={600}
-          maxHeight={700}
-          showCover={true}
-          className='mt-10 shadow-lg'
-          useMouseEvents={false}
-          ref={bookRef}
-        >
-          <div>
-            <BookCoverPage imageUrl={story?.coverImage} />
-          </div>
-          {
-            [...Array(story?.output?.chapters?.length)].map((item, index) => (
+        {viewMode === 'flipbook' ? (
+          // Vista de Flipbook
+          <HTMLFlipBook 
+            width={window.innerWidth < 768 ? 300 : 500} 
+            height={window.innerWidth < 768 ? 400 : 500}
+            maxWidth={600}
+            maxHeight={700}
+            showCover={true}
+            className='mt-10 shadow-lg'
+            useMouseEvents={false}
+            ref={bookRef}
+          >
+            <div>
+              <BookCoverPage imageUrl={story?.coverImage} />
+            </div>
+            {
+              [...Array(story?.output?.chapters?.length)].map((item, index) => (
+                <div key={index} className='bg-white p-10 border rounded-md'>
+                  <StoryPages storyChapter={story?.output.chapters[index]} />
+                </div>
+              ))
+            }
+          </HTMLFlipBook>
+        ) : (
+          // Vista de Lectura Seguida
+          <div className='mt-10 w-full max-w-4xl flex flex-col gap-6'>
+            {story?.output?.chapters?.map((chapter, index) => (
               <div key={index} className='bg-white p-10 border rounded-md'>
-                <StoryPages storyChapter={story?.output.chapters[index]} />
+                <StoryPages storyChapter={chapter} />
               </div>
-            ))
-          }
-        </HTMLFlipBook>
-        {count != 0 && <div className='absolute left-0 md:-left-5 top-1/2 transform -translate-y-1/2'
+            ))}
+          </div>
+        )}
+        {viewMode === 'flipbook' && count != 0 && <div className='absolute left-0 md:-left-5 top-1/2 transform -translate-y-1/2'
           onClick={() => {
             bookRef.current.pageFlip().flipPrev();
             setCount(count - 1)
@@ -60,7 +72,7 @@ function ViewStory({ params }) {
           <IoIosArrowDropleftCircle className='text-[40px] text-primary cursor-pointer' />
         </div>}
 
-        {count != (story?.output.chapters?.length - 1) && <div className='absolute right-0 md:-right-5 top-1/2 transform -translate-y-1/2' onClick={() => {
+        {viewMode === 'flipbook' && count != (story?.output.chapters?.length - 1) && <div className='absolute right-0 md:-right-5 top-1/2 transform -translate-y-1/2' onClick={() => {
           bookRef.current.pageFlip().flipNext();
           setCount(count + 1)
         }}>
@@ -77,9 +89,9 @@ function ViewStory({ params }) {
           <IoIosExpand className='text-[40px] text-primary' />
           <span className='mt-2 text-primary'>Ampliar</span>
         </div>
-        <div className='flex flex-col items-center cursor-pointer'>
+        <div className='flex flex-col items-center cursor-pointer' onClick={() => setViewMode(viewMode === 'flipbook' ? 'scroll' : 'flipbook')}>
           <IoIosDocument className='text-[40px] text-primary' />
-          <span className='mt-2 text-primary'>Lerctura seguida</span>
+          <span className='mt-2 text-primary'>Lectura seguida</span>
         </div>
       </div>
     </div>
