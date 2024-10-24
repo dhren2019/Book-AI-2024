@@ -7,6 +7,7 @@ import HTMLFlipBook from 'react-pageflip';
 import BookCoverPage from '../_components/BookCoverPage';
 import StoryPages from '../_components/StoryPages';
 import { IoIosArrowDroprightCircle, IoIosArrowDropleftCircle, IoIosDownload, IoIosExpand, IoIosDocument } from "react-icons/io";
+import jsPDF from 'jspdf';
 
 function ViewStory({ params }) {
   const [story, setStory] = useState(null);
@@ -36,8 +37,20 @@ function ViewStory({ params }) {
     try {
       const result = await db.select().from(StoryData).where(eq(StoryData.storyId, params.id));
       if (result && result.length > 0) {
-        setStory(result[0]);
-        document.title = result[0]?.output?.story_cover?.title || "Story";
+        const storyData = result[0];
+        // Parse the output JSON field safely
+        if (typeof storyData.output === 'string') {
+          try {
+            storyData.output = JSON.parse(storyData.output);
+          } catch (error) {
+            console.error("Error parsing story output JSON:", error);
+          }
+        }
+        console.log("Fetched Story Data:", storyData); // Log the fetched story data to inspect its structure
+        setStory(storyData);
+        document.title = storyData?.output?.story_cover?.title || "Story";
+      } else {
+        console.warn("No story found for the given ID");
       }
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -54,13 +67,75 @@ function ViewStory({ params }) {
           width: 1000,
           height: 1000,
         });
-        // Aumentar tamaño del texto
-        document.querySelectorAll('.story-title, .story-content').forEach(element => {
-          element.style.fontSize = (parseFloat(getComputedStyle(element).fontSize) + 5) + 'px';
-        });
-      }).catch((err) => {
-        console.error("Error attempting to enable full-screen mode:", err.message);
       });
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    if (story) {
+      const doc = new jsPDF({ format: 'a4' });
+      const title = story.output?.story_cover?.title || "Story Title";
+      console.log("Generating PDF with title:", title);
+      doc.setFontSize(16);
+      doc.text(title, 20, 20);
+      doc.setFontSize(12);
+      
+      // Extract story text and include chapters
+      if (story.output?.chapters) {
+        let currentY = 40;
+        story.output.chapters.forEach((chapter, index) => {
+          console.log(`Adding Chapter ${index + 1}:`, chapter);
+          if (chapter.chapter_title) {
+            doc.setFontSize(14);
+            doc.text(chapter.chapter_title, 20, currentY);
+            currentY += 10;
+          }
+          if (chapter.chapter_text) {
+            const chapterLines = doc.splitTextToSize(chapter.chapter_text, 170);
+            doc.setFontSize(12);
+            doc.text(chapterLines, 20, currentY);
+            currentY += chapterLines.length * 10 + 10;
+          }
+
+          // If the chapter has an image, add it
+          if (chapter.image_prompt) {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = chapter.image_prompt;
+            img.onload = function() {
+              console.log(`Adding image for Chapter ${index + 1}`);
+              doc.addImage(img, 'JPEG', 15, currentY, 180, 100);
+              currentY += 110;
+            };
+            img.onerror = function() {
+              console.error(`Error loading image for Chapter ${index + 1}`);
+            };
+          }
+        });
+      } else {
+        console.warn("No chapters found in story output.");
+      }
+
+      // Handle the cover image
+      if (story.output.story_cover?.imageUrl) {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // Prevent CORS issues
+        img.src = story.output.story_cover.imageUrl;
+        img.onload = function() {
+          console.log("Image loaded successfully. Adding to PDF.");
+          doc.addImage(img, 'JPEG', 15, 40, 180, 100);
+          doc.save(`${title}.pdf`);
+        };
+        img.onerror = function() {
+          console.error("Error loading cover image");
+          doc.save(`${title}.pdf`);
+        };
+      } else {
+        console.warn("No image URL found. Saving PDF without image.");
+        doc.save(`${title}.pdf`);
+      }
+    } else {
+      console.error("No story data available to generate PDF.");
     }
   };
 
@@ -69,7 +144,6 @@ function ViewStory({ params }) {
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
         resetBookDimensions();
-        // Reducir tamaño del texto
         document.querySelectorAll('.story-title, .story-content').forEach(element => {
           element.style.fontSize = (parseFloat(getComputedStyle(element).fontSize) - 5) + 'px';
         });
@@ -193,7 +267,7 @@ function ViewStory({ params }) {
       )}
       {/* Iconos adicionales debajo del libro */}
       <div className={`flex justify-center items-center gap-8 mt-8`}>
-        <div className='flex flex-col items-center cursor-pointer'>
+        <div className='flex flex-col items-center cursor-pointer' onClick={handleDownloadPDF}>
           <IoIosDownload className='text-[40px] text-primary' />
           <span className='mt-2 text-primary'>Descargar</span>
         </div>
