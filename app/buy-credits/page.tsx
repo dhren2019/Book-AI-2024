@@ -2,7 +2,7 @@
 import { db } from '@/config/db';
 import { Users } from '@/config/schema';
 import { PayPalButtons } from '@paypal/react-paypal-js';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { UserDetailContext } from '../_context/UserDetailConext';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'next/navigation';
@@ -53,15 +53,6 @@ function BuyCredits() {
     const notify = (msg: string) => toast(msg);
     const notifyError = (msg: string) => toast.error(msg);
 
-    useEffect(() => {
-        if (selectedOption !== null) {
-            const selected = Options.find(option => option.id === selectedOption);
-            if (selected) {
-                setSelectedPrice(selected.price);
-            }
-        }
-    }, [selectedOption]);
-
     const OnPaymentSuccess = async () => {
         if (selectedOption !== null) {
             console.log("Inside Paypal", Options[selectedOption - 1]?.credits + userDetail?.credit);
@@ -85,38 +76,41 @@ function BuyCredits() {
         }
     };
 
-    const openModal = () => {
-        if (selectedOption !== null) {
-            setModalIsOpen(true);
-        } else {
-            notifyError("Please select an option before proceeding");
+    const selectOption = (optionId: number) => {
+        const selected = Options.find(option => option.id === optionId);
+        if (selected) {
+            setSelectedOption(optionId);
+            setSelectedPrice(selected.price); // Establecer el precio seleccionado
+            setModalIsOpen(true); // Abrir el modal después de actualizar el precio
         }
     };
 
     const closeModal = () => {
         setModalIsOpen(false);
+        setSelectedOption(null);  // Limpiar la selección cuando se cierra el modal
+        setSelectedPrice(0);  // Reiniciar el precio al cerrar el modal
     };
 
     return (
-        <div className='min-h-screen p-10 md:px-20 lg:px-40 text-center bg-gradient-to-b from-blue-700 to-purple-900'>
-            <div className='max-w-6xl mx-auto p-5 bg-yellow-500 rounded-lg shadow-2xl mb-10'>
-                <h2 className='text-6xl font-extrabold text-white tracking-wide drop-shadow-lg'>
+        <div className='container mx-auto min-h-screen p-6 sm:p-10 md:px-20 lg:px-32 text-center bg-gradient-to-b from-blue-700 to-purple-900'>
+            <div className='max-w-5xl mx-auto p-6 bg-yellow-500 rounded-lg shadow-2xl mb-10'>
+                <h2 className='text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-wide drop-shadow-lg'>
                     Epic Treasure Awaits - Unlock Your Credits Today!
                 </h2>
             </div>
-            <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mt-10 items-center'>
-                {Options.map((option, index) => (
-                    <div key={option.id} className={`relative p-10 my-5 border-4 shadow-xl text-center 
-                    rounded-3xl cursor-pointer 
-                    hover:scale-110 hover:rotate-3 transition-transform duration-500 ease-out 
-                    hover:bg-blue-400 hover:shadow-2xl
-                    ${selectedOption === option.id ? 'bg-blue-500 border-blue-700' : 'bg-blue-300 border-blue-500'}
-                    `}
-                        onClick={() => { setSelectedOption(option.id); openModal(); }}>
-                        <img src={option.image.src} alt={`Option ${option.id}`} className='w-56 h-auto mx-auto mb-6 -mt-16 object-contain drop-shadow-2xl transform hover:translate-y-4 hover:rotate-6 transition-all duration-500' />
-                        <h2 className='text-3xl font-bold text-white'>Get {option.credits} Credits</h2>
-                        <h3 className='text-2xl text-yellow-200'>Generate <strong>{option.stories}</strong> Stories</h3>
-                        <h2 className='font-bold text-4xl text-yellow-300 mt-2'>${option.price}</h2>
+            <div className='max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 mt-10 items-center'>
+                {Options.map((option) => (
+                    <div key={option.id} 
+                         className={`relative p-8 sm:p-10 border-4 shadow-xl text-center rounded-3xl cursor-pointer 
+                         transition-transform transform hover:scale-105 hover:rotate-2 hover:bg-blue-400 
+                         hover:shadow-2xl duration-300 ease-out 
+                         ${selectedOption === option.id ? 'bg-blue-500 border-blue-700' : 'bg-blue-300 border-blue-500'}`}
+                         onClick={() => selectOption(option.id)}>
+                        <img src={option.image.src} alt={`Option ${option.id}`} 
+                             className='w-48 sm:w-52 lg:w-56 h-auto mx-auto mb-6 -mt-16 object-contain drop-shadow-2xl' />
+                        <h2 className='text-2xl sm:text-3xl font-bold text-white'>Get {option.credits} Credits</h2>
+                        <h3 className='text-lg sm:text-xl lg:text-2xl text-yellow-200'>Generate <strong>{option.stories}</strong> Stories</h3>
+                        <h2 className='font-bold text-3xl sm:text-4xl text-yellow-300 mt-2'>${option.price}</h2>
                     </div>
                 ))}
             </div>
