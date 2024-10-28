@@ -48,12 +48,19 @@ function CreateStory() {
       ...prev,
       [data.fieldName]: data.fieldValue
     }));
-    console.log(formData);
+    setTimeout(() => {
+      console.log('Updated form data:', formData);
+    }, 0);
   };
 
   // Generate Story Function
   const GenerateStory = async () => {
-    if (userDetail.credit <= 0) {
+    if (!formData || Object.values(formData).some(field => !field)) {
+      notifyError('Please fill in all the fields to proceed!');
+      return;
+    }
+
+    if (userDetail?.credit <= 0) {
       notifyError('You dont have enough credits!');
       return;
     }
@@ -69,12 +76,11 @@ function CreateStory() {
     try {
       // Generate AI Story
       const result = await chatSession.sendMessage(FINAL_PROMPT);
-      const story = JSON.parse(result?.response.text().replace(/(})(,?)(\n *\})/g, "$1,"));
+      const story = result?.response?.text();
 
       // Generate Image
       const imageResp = await axios.post('/api/generate-image', {
-        prompt: 'Add text with title: ' + story?.story_cover?.title +
-          " in bold text for book cover, " + story?.story_cover?.image_prompt
+        prompt: `Add text with title: ${formData.storySubject} in bold text for book cover, ${formData.imageStyle}`
       });
 
       const AiImageUrl = imageResp?.data?.imageUrl;
@@ -84,7 +90,7 @@ function CreateStory() {
       });
 
       const FirebaseStorageImageUrl = imageResult.data.imageUrl;
-      const resp: any = await SaveInDB(result?.response.text(), FirebaseStorageImageUrl);
+      const resp: any = await SaveInDB(story, FirebaseStorageImageUrl);
       notify("Story generated");
       await UpdateUserCredits();
       router?.replace('/view-story/' + resp[0].storyId);
@@ -107,7 +113,7 @@ function CreateStory() {
         imageStyle: formData?.imageStyle,
         storySubject: formData?.storySubject,
         storyType: formData?.storyType,
-        output: JSON.parse(output),
+        output: output,
         coverImage: imageUrl,
         userEmail: user?.primaryEmailAddress?.emailAddress,
         userImage: user?.imageUrl,
@@ -116,53 +122,59 @@ function CreateStory() {
       setLoading(false);
       return result;
     } catch (e) {
+      console.log(e);
       setLoading(false);
     }
   };
 
   // Update User Credits in Database
   const UpdateUserCredits = async () => {
-    const result = await db.update(Users).set({
-      credit: Number(userDetail?.credit - 1)
-    }).where(eq(Users.userEmail, user?.primaryEmailAddress?.emailAddress ?? ''))
-      .returning({ id: Users.id });
+    try {
+      await db.update(Users).set({
+        credit: Number(userDetail?.credit - 1)
+      }).where(eq(Users.userEmail, user?.primaryEmailAddress?.emailAddress ?? ''))
+        .returning({ id: Users.id });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
-    <div className='w-full min-h-screen p-6 sm:p-10 bg-gradient-to-b from-gray-800 to-black text-white overflow-hidden'>
-      <h2 className='font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[60px] text-primary text-center mb-8'>
+    <div className='w-full min-h-screen p-6 sm:p-10 bg-gradient-to-b from-[#5253A3] to-[#8EA4D2] text-[#FFFFFF] overflow-hidden'>
+      <h2 className='font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[60px] text-[#FFB84C] text-center mb-8'>
         CREATE YOUR STORY
       </h2>
-      <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-primary text-center mb-10 px-4 md:px-0'>
+      <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-[#3FB4C4] text-center mb-10 px-4 md:px-0'>
         Unlock your creativity with AI: Craft stories like never before! Let our AI bring your imagination to life, one story at a time.
       </p>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mt-10'>
         {/* Story Subject  */}
-        <div className='flex flex-col items-center p-4 md:p-8 bg-gray-900 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out w-full h-auto'>
-          <StorySubjectInput userSelection={onHandleUserSelection} />
+        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+          <StorySubjectInput userSelection={onHandleUserSelection} placeholder='Enter the subject of your story here (Examples: "A brave girl in a magical kingdom", "A dog who wants to fly", "The mysterious enchanted forest")' />
         </div>
         {/* Story Type  */}
-        <div className='flex flex-col items-center p-4 md:p-8 bg-gray-900 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out w-full h-auto'>
-          <StoryType userSelection={onHandleUserSelection} customClass='grid grid-cols-2 gap-4 text-xs sm:text-sm md:text-base' />
+        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+          <StoryType userSelection={onHandleUserSelection} />
         </div>
         {/* Age Group  */}
-        <div className='flex flex-col items-center p-4 md:p-8 bg-gray-900 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out w-full h-auto'>
-          <AgeGroup userSelection={onHandleUserSelection} customClass='grid grid-cols-2 gap-4 text-xs sm:text-sm md:text-base' />
+        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+          <AgeGroup userSelection={onHandleUserSelection} />
         </div>
         {/* Image Style  */}
-        <div className='flex flex-col items-center p-4 md:p-8 bg-gray-900 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out w-full h-auto'>
-          <ImageStyle userSelection={onHandleUserSelection} customClass='grid grid-cols-2 gap-4 text-xs sm:text-sm md:text-base' />
+        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+          <ImageStyle userSelection={onHandleUserSelection} />
         </div>
       </div>
 
       <div className='flex flex-col sm:flex-row justify-center items-center gap-6 mt-16 w-full'>
         <Button color='primary'
           disabled={loading}
-          className='w-full sm:w-auto px-8 py-6 sm:px-12 sm:py-8 text-base sm:text-lg lg:text-xl font-bold bg-blue-500 hover:bg-blue-600 transition-colors duration-300 ease-in-out rounded-lg shadow-md hover:shadow-lg'>
+          onClick={GenerateStory}
+          className='w-full sm:w-auto px-8 py-6 sm:px-12 sm:py-8 text-base sm:text-lg lg:text-xl font-bold bg-[#FFB84C] hover:bg-[#FF6F59] transition-colors duration-300 ease-in-out rounded-lg shadow-md hover:shadow-lg'>
           Generate Story
         </Button>
-        <span className='text-sm text-primary sm:ml-4'>1 Credit will be used</span>
+        <span className='text-sm text-[#FFFFFF] font-bold sm:ml-4'>1 Credit will be used</span>
       </div>
 
       <CustomLoader isLoading={loading} />
