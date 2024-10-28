@@ -92,13 +92,13 @@ function BuyCredits() {
     };
 
     return (
-        <div className='container mx-auto min-h-screen p-6 sm:p-10 md:px-20 lg:px-32 text-center bg-gradient-to-b from-blue-700 to-purple-900'>
-            <div className='max-w-5xl mx-auto p-6 bg-yellow-500 rounded-lg shadow-2xl mb-10'>
-                <h2 className='text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-wide drop-shadow-lg'>
+        <div className='w-full min-h-screen p-6 sm:p-10 lg:px-40 text-center bg-gradient-to-b from-blue-700 to-purple-900'>
+            <div className='w-full mx-auto p-6 bg-yellow-500 rounded-lg shadow-2xl mb-10'>
+                <h2 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-wide drop-shadow-lg'>
                     Epic Treasure Awaits - Unlock Your Credits Today!
                 </h2>
             </div>
-            <div className='max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 mt-10 items-center'>
+            <div className='max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 mt-10 items-center justify-center'>
                 {Options.map((option) => (
                     <div key={option.id} 
                          className={`relative p-8 sm:p-10 border-4 shadow-xl text-center rounded-3xl cursor-pointer 
@@ -107,7 +107,7 @@ function BuyCredits() {
                          ${selectedOption === option.id ? 'bg-blue-500 border-blue-700' : 'bg-blue-300 border-blue-500'}`}
                          onClick={() => selectOption(option.id)}>
                         <img src={option.image.src} alt={`Option ${option.id}`} 
-                             className='w-48 sm:w-52 lg:w-56 h-auto mx-auto mb-6 -mt-16 object-contain drop-shadow-2xl' />
+                             className='w-full max-w-[220px] sm:max-w-[240px] md:max-w-[260px] lg:max-w-[280px] xl:max-w-[300px] h-auto mx-auto mb-6 -mt-16 object-contain drop-shadow-2xl' />
                         <h2 className='text-2xl sm:text-3xl font-bold text-white'>Get {option.credits} Credits</h2>
                         <h3 className='text-lg sm:text-xl lg:text-2xl text-yellow-200'>Generate <strong>{option.stories}</strong> Stories</h3>
                         <h2 className='font-bold text-3xl sm:text-4xl text-yellow-300 mt-2'>${option.price}</h2>

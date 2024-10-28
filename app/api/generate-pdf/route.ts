@@ -78,8 +78,15 @@ export async function POST(req: NextRequest) {
       autoFirstPage: false, // No crear la primera página automáticamente
     });
 
-    // Usar una fuente estándar sin problemas de archivo externo
-    doc.font('Courier'); // Usar Courier, que es una fuente estándar segura
+    // Usar la fuente GeistMonoVF desde la carpeta de fuentes
+    const fontPath = path.join(process.cwd(), 'app', 'fonts', 'GeistMonoVF.woff');
+    if (fs.existsSync(fontPath)) {
+      doc.registerFont('GeistMono', fontPath);
+      doc.font('GeistMono');
+    } else {
+      // Si la fuente no está disponible, usar una fuente predeterminada
+      doc.font('Courier');
+    }
 
     let pdfBuffer = Buffer.alloc(0);
     const buffers: Buffer[] = [];
