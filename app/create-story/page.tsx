@@ -17,6 +17,7 @@ import { toast } from 'react-toastify';
 import { useUser } from '@clerk/nextjs';
 import { UserDetailContext } from '../_context/UserDetailConext';
 import { eq } from 'drizzle-orm';
+import { motion } from 'framer-motion';
 
 const CREATE_STORY_PROMPT = process.env.NEXT_PUBLIC_CREATE_STORY_PROMPT;
 
@@ -141,33 +142,61 @@ function CreateStory() {
 
   return (
     <div className='w-full min-h-screen p-6 sm:p-10 bg-gradient-to-b from-[#5253A3] to-[#8EA4D2] text-[#FFFFFF] overflow-hidden'>
-      <h2 className='font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[60px] text-[#FFB84C] text-center mb-8'>
+      <motion.h2 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
+        className='font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[60px] text-[#FFB84C] text-center mb-8'>
         CREATE YOUR STORY
-      </h2>
-      <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-[#3FB4C4] text-center mb-10 px-4 md:px-0'>
+      </motion.h2>
+      <motion.p 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2 }}
+        className='text-base sm:text-lg md:text-xl lg:text-2xl text-[#3FB4C4] text-center mb-10 px-4 md:px-0'>
         Unlock your creativity with AI: Craft stories like never before! Let our AI bring your imagination to life, one story at a time.
-      </p>
+      </motion.p>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mt-10'>
         {/* Story Subject  */}
-        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
-          <StorySubjectInput userSelection={onHandleUserSelection} placeholder='Enter the subject of your story here (Examples: "A brave girl in a magical kingdom", "A dog who wants to fly", "The mysterious enchanted forest")' />
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+          <StorySubjectInput userSelection={onHandleUserSelection} placeholder='Enter the subject of your story here.Examples: "A brave girl in a magical kingdom", "A dog who wants to fly", "The mysterious enchanted forest")' />
+        </motion.div>
         {/* Story Type  */}
-        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2 }}
+          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
           <StoryType userSelection={onHandleUserSelection} />
-        </div>
+        </motion.div>
         {/* Age Group  */}
-        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.4 }}
+          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
           <AgeGroup userSelection={onHandleUserSelection} />
-        </div>
+        </motion.div>
         {/* Image Style  */}
-        <div className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.6 }}
+          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
           <ImageStyle userSelection={onHandleUserSelection} />
-        </div>
+        </motion.div>
       </div>
 
-      <div className='flex flex-col sm:flex-row justify-center items-center gap-6 mt-16 w-full'>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.8 }}
+        className='flex flex-col sm:flex-row justify-center items-center gap-6 mt-16 w-full'>
         <Button color='primary'
           disabled={loading}
           onClick={GenerateStory}
@@ -175,7 +204,7 @@ function CreateStory() {
           Generate Story
         </Button>
         <span className='text-sm text-[#FFFFFF] font-bold sm:ml-4'>1 Credit will be used</span>
-      </div>
+      </motion.div>
 
       <CustomLoader isLoading={loading} />
     </div>
