@@ -39,12 +39,13 @@ function ViewStory({ params }) {
       if (result && result.length > 0) {
         const storyData = result[0];
         if (typeof storyData.output === 'string') {
-          try {
-            storyData.output = JSON.parse(storyData.output);
-          } catch (error) {
-            console.error("Error parsing story output JSON:", error);
-          }
-        }
+    try {
+        storyData.output = JSON.parse(storyData.output);
+    } catch (error) {
+        console.error("Error parsing story output JSON:", error);
+    }
+}
+
         setStory(storyData);
         document.title = storyData?.output?.story_cover?.title || "Story";
       } else {

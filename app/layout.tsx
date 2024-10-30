@@ -6,6 +6,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import Footer from './_components/Footer';
 import Head from 'next/head';
+import GTranslateWidget from './_components/GTranslateWidget';
+
+
 
 const MyAppFont = Nunito({ subsets: ['latin'] });
 
@@ -23,11 +26,11 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <Head>
-          {/* Cambiar el favicon por el nuevo logo */}
           <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         </Head>
         <body className={MyAppFont.className}>
           <Provider>
+            <GTranslateWidget /> {/* Agrega el widget aquí */}
             {children}
           </Provider>
           <Analytics />

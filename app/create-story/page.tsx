@@ -43,25 +43,16 @@ function CreateStory() {
   const { user } = useUser();
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
 
-  // Handle user input selection and add to form data
   const onHandleUserSelection = (data: fieldData) => {
     setFormData((prev: any) => ({
       ...prev,
-      [data.fieldName]: data.fieldValue
+      [data.fieldName]: data.fieldValue,
     }));
-    setTimeout(() => {
-      console.log('Updated form data:', formData);
-    }, 0);
+    console.log(formData);
   };
 
-  // Generate Story Function
   const GenerateStory = async () => {
-    if (!formData || Object.values(formData).some(field => !field)) {
-      notifyError('Please fill in all the fields to proceed!');
-      return;
-    }
-
-    if (userDetail?.credit <= 0) {
+    if (!userDetail || userDetail.credit <= 0) {
       notifyError('You dont have enough credits!');
       return;
     }
@@ -75,23 +66,31 @@ function CreateStory() {
       .replace('{imageStyle}', formData?.imageStyle ?? '');
 
     try {
-      // Generate AI Story
+      // Send message to AI and receive the result
       const result = await chatSession.sendMessage(FINAL_PROMPT);
-      const story = result?.response?.text();
+      const storyResponse = result?.response?.text();
+
+      // Validate JSON before parsing
+      if (!storyResponse || !isValidJSON(storyResponse)) {
+        throw new Error('Invalid JSON response from AI');
+      }
+
+      const story = JSON.parse(storyResponse);
 
       // Generate Image
       const imageResp = await axios.post('/api/generate-image', {
-        prompt: `Add text with title: ${formData.storySubject} in bold text for book cover, ${formData.imageStyle}`
+        prompt: 'Add text with title:' + story?.story_cover?.title +
+          " in bold text for book cover, " + story?.story_cover?.image_prompt,
       });
 
       const AiImageUrl = imageResp?.data?.imageUrl;
 
       const imageResult = await axios.post('/api/save-image', {
-        url: AiImageUrl
+        url: AiImageUrl,
       });
 
       const FirebaseStorageImageUrl = imageResult.data.imageUrl;
-      const resp: any = await SaveInDB(story, FirebaseStorageImageUrl);
+      const resp: any = await SaveInDB(storyResponse, FirebaseStorageImageUrl);
       notify("Story generated");
       await UpdateUserCredits();
       router?.replace('/view-story/' + resp[0].storyId);
@@ -103,7 +102,15 @@ function CreateStory() {
     }
   };
 
-  // Save Story Data in Database
+  const isValidJSON = (text: string) => {
+    try {
+      JSON.parse(text);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
   const SaveInDB = async (output: string, imageUrl: string) => {
     const recordId = uuid4();
     setLoading(true);
@@ -114,96 +121,119 @@ function CreateStory() {
         imageStyle: formData?.imageStyle,
         storySubject: formData?.storySubject,
         storyType: formData?.storyType,
-        output: output,
+        output: JSON.parse(output),
         coverImage: imageUrl,
         userEmail: user?.primaryEmailAddress?.emailAddress,
         userImage: user?.imageUrl,
-        userName: user?.fullName
+        userName: user?.fullName,
       }).returning({ storyId: StoryData?.storyId });
       setLoading(false);
       return result;
     } catch (e) {
-      console.log(e);
       setLoading(false);
     }
   };
 
-  // Update User Credits in Database
   const UpdateUserCredits = async () => {
-    try {
+    if (userDetail) {
       await db.update(Users).set({
-        credit: Number(userDetail?.credit - 1)
+        credit: Number(userDetail?.credit - 1),
       }).where(eq(Users.userEmail, user?.primaryEmailAddress?.emailAddress ?? ''))
         .returning({ id: Users.id });
-    } catch (e) {
-      console.log(e);
     }
   };
 
   return (
-    <div className='w-full min-h-screen p-6 sm:p-10 bg-gradient-to-b from-[#5253A3] to-[#8EA4D2] text-[#FFFFFF] overflow-hidden'>
-      <motion.h2 
+    <div className="min-h-screen flex flex-col items-center py-12 px-6 lg:px-24 bg-gradient-to-br from-[#FFE3C9] to-[#FFB9C5] relative overflow-hidden">
+      {/* Fondos decorativos */}
+      <div className="absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-[#FF8A65] opacity-40 blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-[#FFD54F] opacity-40 blur-2xl"></div>
+
+      {/* Título */}
+      <motion.div
+        className="text-center mb-12"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        className='font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[60px] text-[#FFB84C] text-center mb-8'>
-        CREATE YOUR STORY
-      </motion.h2>
-      <motion.p 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2 }}
-        className='text-base sm:text-lg md:text-xl lg:text-2xl text-[#3FB4C4] text-center mb-10 px-4 md:px-0'>
-        Unlock your creativity with AI: Craft stories like never before! Let our AI bring your imagination to life, one story at a time.
-      </motion.p>
+      >
+        <h2 className="text-5xl font-bold text-[#6A1B9A] mb-4">Create Your Story</h2>
+        <p className="text-xl text-[#5D4037]">Let AI bring your imagination to life!</p>
+      </motion.div>
 
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mt-10'>
-        {/* Story Subject  */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1 }}
-          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
-          <StorySubjectInput userSelection={onHandleUserSelection} placeholder='Enter the subject of your story here.Examples: "A brave girl in a magical kingdom", "A dog who wants to fly", "The mysterious enchanted forest")' />
+      {/* Inputs de Selección */}
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8">
+        {/* Story Subject */}
+        <motion.div
+          className="bg-white bg-opacity-50 rounded-[40px] p-8 shadow-lg backdrop-blur-md transition-transform hover:scale-105 flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1 }}
+        >
+          <StorySubjectInput
+            userSelection={onHandleUserSelection}
+            placeholder="Enter your story subject"
+            inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
+          />
         </motion.div>
-        {/* Story Type  */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+
+        {/* Story Type */}
+        <motion.div
+          className="bg-white bg-opacity-50 rounded-[40px] p-8 shadow-lg backdrop-blur-md transition-transform hover:scale-105 flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2 }}
-          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
-          <StoryType userSelection={onHandleUserSelection} />
+        >
+          <div className="w-full overflow-x-scroll flex space-x-4 pb-4">
+            <StoryType
+              userSelection={onHandleUserSelection}
+              inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
+            />
+          </div>
         </motion.div>
-        {/* Age Group  */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+
+        {/* Age Group */}
+        <motion.div
+          className="bg-white bg-opacity-50 rounded-[40px] p-8 shadow-lg backdrop-blur-md transition-transform hover:scale-105 flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.3 }}
+        >
+          <AgeGroup
+            userSelection={onHandleUserSelection}
+            inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
+          />
+        </motion.div>
+
+        {/* Image Style */}
+        <motion.div
+          className="bg-white bg-opacity-50 rounded-[40px] p-8 shadow-lg backdrop-blur-md transition-transform hover:scale-105 flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4 }}
-          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
-          <AgeGroup userSelection={onHandleUserSelection} />
-        </motion.div>
-        {/* Image Style  */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.6 }}
-          className='p-4 md:p-8 bg-[#FFE5B4] rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out'>
-          <ImageStyle userSelection={onHandleUserSelection} />
+        >
+          <ImageStyle
+            userSelection={onHandleUserSelection}
+            inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
+          />
         </motion.div>
       </div>
 
-      <motion.div 
+      {/* Botón para Generar Historia */}
+      <motion.div
+        className="mt-16 w-full max-w-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.8 }}
-        className='flex flex-col sm:flex-row justify-center items-center gap-6 mt-16 w-full'>
-        <Button color='primary'
+        transition={{ duration: 1.5 }}
+      >
+        <Button
+          color="primary" // Cambié "gradient" por "primary" para evitar el error
           disabled={loading}
           onClick={GenerateStory}
-          className='w-full sm:w-auto px-8 py-6 sm:px-12 sm:py-8 text-base sm:text-lg lg:text-xl font-bold bg-[#FFB84C] hover:bg-[#FF6F59] transition-colors duration-300 ease-in-out rounded-lg shadow-md hover:shadow-lg'>
+          className="w-full text-white font-semibold py-6 rounded-full shadow-xl hover:shadow-2xl transition-transform hover:scale-105 duration-300 bg-gradient-to-r from-[#FFAA4C] to-[#FF6F59]"
+        >
           Generate Story
         </Button>
-        <span className='text-sm text-[#FFFFFF] font-bold sm:ml-4'>1 Credit will be used</span>
+        <p className="text-center text-gray-700 mt-4">1 Credit will be used</p>
       </motion.div>
 
       <CustomLoader isLoading={loading} />

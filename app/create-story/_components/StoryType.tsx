@@ -39,7 +39,7 @@ function StoryType({ userSelection }: any) {
         { label: 'Excited', imageUrl: '/excited.webp', isFree: true },
         { label: 'Anxious', imageUrl: '/anxious.webp', isFree: true },
         { label: 'Relaxed', imageUrl: '/relaxed.webp', isFree: true },
-        { label: 'Curious', imageUrl: '/curious.webp', isFree: true }
+        { label: 'Curious', imageUrl: '/corious.webp', isFree: true }
     ];
 
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
