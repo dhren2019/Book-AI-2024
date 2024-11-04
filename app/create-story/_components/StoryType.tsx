@@ -11,26 +11,10 @@ export interface OptionField {
 
 function StoryType({ userSelection }: any) {
     const OptionList = [
-        {
-            label: 'Story Book',
-            imageUrl: '/story.png',
-            isFree: true
-        },
-        {
-            label: 'Bed Story',
-            imageUrl: '/bedstory.png',
-            isFree: true
-        },
-        {
-            label: 'Educational',
-            imageUrl: '/educational.png',
-            isFree: true
-        },
-        {
-            label: 'Emotions',
-            imageUrl: '/emotions.webp',
-            isFree: true
-        },
+        { label: 'Story Book', imageUrl: '/story.png', isFree: true },
+        { label: 'Bed Story', imageUrl: '/bedstory.png', isFree: true },
+        { label: 'Educational', imageUrl: '/educational.png', isFree: true },
+        { label: 'Emotions', imageUrl: '/emotions.webp', isFree: true }
     ];
 
     const emotionsList = [
@@ -47,10 +31,7 @@ function StoryType({ userSelection }: any) {
     const [showIndicator, setShowIndicator] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowIndicator(false);
-        }, 7000);
-
+        const timer = setTimeout(() => setShowIndicator(false), 7000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -77,43 +58,48 @@ function StoryType({ userSelection }: any) {
 
     return (
         <div>
-            <label className='font-bold text-4xl text-primary'>2. Story Type</label>
+            
             {selectedOption !== 'Emotions' ? (
                 <div className='mt-3 py-4 px-2'>
-                    <div className='hidden sm:grid grid-cols-3 gap-5'>
+                    {/* Ajuste a grid-cols-2 para organizar en 2 columnas */}
+                    <div className='hidden sm:grid grid-cols-2 gap-5'>
                         {OptionList.map((item) => (
                             <div
                                 key={item.label}
                                 className={`relative cursor-pointer p-1
-                                ${selectedOption === item.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale hover:grayscale-0'}`}
+                                ${selectedOption === item.label ? 'border-2 rounded-3xl border-primary' : 'hover:border-primary'}`}
                                 onClick={() => onUserSelect(item)}
                             >
-                                <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{item.label}</h2>
+                                <div className='absolute inset-0 bg-gradient-to-t from-[#ff7e5f80] via-[#feb47b80] to-transparent opacity-0 hover:opacity-80 transition-opacity rounded-b-3xl'></div>
+                                
+                                <h2 className='absolute bottom-5 text-xl text-white text-center w-full'>{item.label}</h2>
                                 <Image
                                     src={item.imageUrl}
                                     alt={item.label}
                                     width={300}
                                     height={500}
-                                    className='object-cover h-[260px] rounded-3xl'
+                                    className='object-cover h-[200px] rounded-3xl'
                                 />
                             </div>
                         ))}
                     </div>
                     <div className='flex sm:hidden overflow-x-auto space-x-4 scrollbar-hide relative'>
-                        {OptionList.map((item, index) => (
+                        {OptionList.map((item) => (
                             <div
                                 key={item.label}
                                 className={`relative flex-shrink-0 cursor-pointer p-1 w-[300px]
-                                ${selectedOption === item.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale hover:grayscale-0'}`}
+                                ${selectedOption === item.label ? 'border-2 rounded-3xl border-primary' : 'hover:border-primary'}`}
                                 onClick={() => onUserSelect(item)}
                             >
-                                <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{item.label}</h2>
+                                <div className='absolute inset-0 bg-gradient-to-t from-[#ff7e5f80] via-[#feb47b80] to-transparent opacity-0 hover:opacity-80 transition-opacity rounded-b-3xl'></div>
+
+                                <h2 className='absolute bottom-5 text-xl text-white text-center w-full'>{item.label}</h2>
                                 <Image
                                     src={item.imageUrl}
                                     alt={item.label}
                                     width={300}
                                     height={500}
-                                    className='object-cover h-[260px] rounded-3xl'
+                                    className='object-cover h-[200px] rounded-3xl'
                                 />
                             </div>
                         ))}
@@ -128,40 +114,44 @@ function StoryType({ userSelection }: any) {
                 </div>
             ) : (
                 <div className='mt-3 py-4 px-2'>
-                    <div className='hidden sm:grid grid-cols-3 gap-5'>
+                    <div className='hidden sm:grid grid-cols-2 gap-5'>
                         {emotionsList.map((emotion) => (
                             <div
                                 key={emotion.label}
                                 className={`relative cursor-pointer p-1
-                                ${selectedEmotion === emotion.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale hover:grayscale-0'}`}
+                                ${selectedEmotion === emotion.label ? 'border-2 rounded-3xl border-primary' : 'hover:border-primary'}`}
                                 onClick={() => onEmotionSelect(emotion)}
                             >
-                                <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{emotion.label}</h2>
+                                <div className='absolute inset-0 bg-gradient-to-t from-[#ff7e5f80] via-[#feb47b80] to-transparent opacity-0 hover:opacity-80 transition-opacity rounded-b-3xl'></div>
+
+                                <h2 className='absolute bottom-5 text-xl text-white text-center w-full'>{emotion.label}</h2>
                                 <Image
                                     src={emotion.imageUrl}
                                     alt={emotion.label}
                                     width={300}
                                     height={500}
-                                    className='object-cover h-[260px] rounded-3xl'
+                                    className='object-cover h-[200px] rounded-3xl'
                                 />
                             </div>
                         ))}
                     </div>
                     <div className='flex sm:hidden overflow-x-auto space-x-4 scrollbar-hide relative'>
-                        {emotionsList.map((emotion, index) => (
+                        {emotionsList.map((emotion) => (
                             <div
                                 key={emotion.label}
                                 className={`relative flex-shrink-0 cursor-pointer p-1 w-[300px]
-                                ${selectedEmotion === emotion.label ? 'grayscale-0 border-2 rounded-3xl border-primary' : 'grayscale hover:grayscale-0'}`}
+                                ${selectedEmotion === emotion.label ? 'border-2 rounded-3xl border-primary' : 'hover:border-primary'}`}
                                 onClick={() => onEmotionSelect(emotion)}
                             >
-                                <h2 className='absolute bottom-5 text-2xl text-white text-center w-full'>{emotion.label}</h2>
+                                <div className='absolute inset-0 bg-gradient-to-t from-[#ff7e5f80] via-[#feb47b80] to-transparent opacity-0 hover:opacity-80 transition-opacity rounded-b-3xl'></div>
+
+                                <h2 className='absolute bottom-5 text-xl text-white text-center w-full'>{emotion.label}</h2>
                                 <Image
                                     src={emotion.imageUrl}
                                     alt={emotion.label}
                                     width={300}
                                     height={500}
-                                    className='object-cover h-[260px] rounded-3xl'
+                                    className='object-cover h-[200px] rounded-3xl'
                                 />
                             </div>
                         ))}

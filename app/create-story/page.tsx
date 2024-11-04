@@ -66,18 +66,15 @@ function CreateStory() {
       .replace('{imageStyle}', formData?.imageStyle ?? '');
 
     try {
-      // Send message to AI and receive the result
       const result = await chatSession.sendMessage(FINAL_PROMPT);
       const storyResponse = result?.response?.text();
 
-      // Validate JSON before parsing
       if (!storyResponse || !isValidJSON(storyResponse)) {
         throw new Error('Invalid JSON response from AI');
       }
 
       const story = JSON.parse(storyResponse);
 
-      // Generate Image
       const imageResp = await axios.post('/api/generate-image', {
         prompt: 'Add text with title:' + story?.story_cover?.title +
           " in bold text for book cover, " + story?.story_cover?.image_prompt,
@@ -149,15 +146,20 @@ function CreateStory() {
       <div className="absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-[#FF8A65] opacity-40 blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-[#FFD54F] opacity-40 blur-2xl"></div>
 
-      {/* Título */}
+      {/* Título y Subtítulo */}
       <motion.div
         className="text-center mb-12"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        <h2 className="text-5xl font-bold text-[#6A1B9A] mb-4">Create Your Story</h2>
-        <p className="text-xl text-[#5D4037]">Let AI bring your imagination to life!</p>
+        <div className="flex justify-center items-center gap-4">
+          <h2 className="text-5xl font-extrabold text-[#6A1B9A]">Create Your Story</h2>
+          <img src="explore.gif" alt="Explore" className="w-40 h-40" />
+        </div>
+        <p className="text-2xl text-[#5D4037] mt-4">
+          Unlock your creativity with AI: Craft stories like never before! Let our AI bring your imagination to life, one story at a time.
+        </p>
       </motion.div>
 
       {/* Inputs de Selección */}
@@ -169,6 +171,10 @@ function CreateStory() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1 }}
         >
+          <div className="flex items-center gap-4 mb-4">
+            <img src="globe.png" alt="Story Subject Icon" className="w-20 h-20" />
+            <h3 className="text-3xl font-bold text-[#5253A3]">Story Subject</h3>
+          </div>
           <StorySubjectInput
             userSelection={onHandleUserSelection}
             placeholder="Enter your story subject"
@@ -183,12 +189,14 @@ function CreateStory() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2 }}
         >
-          <div className="w-full overflow-x-scroll flex space-x-4 pb-4">
-            <StoryType
-              userSelection={onHandleUserSelection}
-              inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
-            />
+          <div className="flex items-center gap-4 mb-4">
+            <img src="subject.png" alt="Story Type Icon" className="w-20 h-20" />
+            <h3 className="text-3xl font-bold text-[#5253A3]">Story Type</h3>
           </div>
+          <StoryType
+            userSelection={onHandleUserSelection}
+            inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
+          />
         </motion.div>
 
         {/* Age Group */}
@@ -198,6 +206,10 @@ function CreateStory() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.3 }}
         >
+          <div className="flex items-center gap-4 mb-4">
+            <img src="king.png" alt="Age Group Icon" className="w-20 h-20" />
+            <h3 className="text-3xl font-bold text-[#5253A3]">Age Group</h3>
+          </div>
           <AgeGroup
             userSelection={onHandleUserSelection}
             inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
@@ -211,6 +223,10 @@ function CreateStory() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4 }}
         >
+          <div className="flex items-center gap-4 mb-4">
+            <img src="book.png" alt="Image Style Icon" className="w-20 h-20" />
+            <h3 className="text-3xl font-bold text-[#5253A3]">Image Style</h3>
+          </div>
           <ImageStyle
             userSelection={onHandleUserSelection}
             inputClassName="bg-transparent border-0 focus:outline-none text-[#000]"
@@ -226,7 +242,7 @@ function CreateStory() {
         transition={{ duration: 1.5 }}
       >
         <Button
-          color="primary" // Cambié "gradient" por "primary" para evitar el error
+          color="primary"
           disabled={loading}
           onClick={GenerateStory}
           className="w-full text-white font-semibold py-6 rounded-full shadow-xl hover:shadow-2xl transition-transform hover:scale-105 duration-300 bg-gradient-to-r from-[#FFAA4C] to-[#FF6F59]"
